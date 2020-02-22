@@ -3,6 +3,16 @@
 ---
 
 **WARNING**\
+You cannot copy-paste the configs as they are. **First, you have to generate an ed25519 key in order to use them as they are**.
+1. On the client: ssh-keygen -t ed25519 (this is used to generate the key)
+2. On the client: ssh-copy-id USERNAME@HOSTNAME (connect to your server, copying the newly generated key)
+3. Try again to log into the server using the key, then do whatever you want.
+
+---
+
+---
+
+**WARNING**\
 These are drafts. One day I'll arrange them. In the meanwhile, if you want to help me or if you have some tips to harden the SSH configuration, please tell me! I need to know people like you.
 
 ---
