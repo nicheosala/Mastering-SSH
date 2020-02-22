@@ -7,6 +7,25 @@ Host *
 # The following line enforces the usage of verson 2.
 Protocol 2
 
+## Disable password authentication ##
+# If we have SSH keys working we can just disable
+# all password authentication. Login using SSH keys
+# is way more secure than using a password, because
+# there exists attacks that can find out the password
+# using effective heuristics. When you use SSH keys,
+# the attacker can only perform a brute-force attack,
+# with no good heuristics to exploit.
+PasswordAuthentication no
+
+## Disable multi-factor authentication ##
+# Okay, you can think to activate this.
+# However, I think the authentication process
+# would become too difficult for nothing:
+# we already use an SSH key! However, I reccomend
+# you to use OTP with your online accounts, because
+# there's only a password to protect them by default.
+ChallengeResponseAuthentication no
+
 ## Disable X11 forwarding ##
 # This guide is intended for use with remote servers.
 # Generally speaking, there is no reason to use a GUI 
@@ -28,15 +47,18 @@ PubkeyAuthentication yes
 # https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt
 KexAlgorithms curve25519-sha256@libssh.org
 
-## Client authentication ##
-PasswordAuthentication no
-ChallengeResponseAuthentication no
-HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519,ssh-rsa
+## Authentication ##
+# Now that client and server shares a secret, they have to auhtenticate
+# each other: at this point, maybe the secret was shared with the wrong
+# host (i.e. NSA haha).
+# The server proves its identity to the client by signing the key
+# resulting from the key exchange.
+HostKeyAlgorithms ssh-ed25519
 
 ## Symmetric ciphers ##
 # Symmetric ciphers are used to encrypt the data after the initial key
 # exchange and authentication is complete.
-Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+Ciphers chacha20-poly1305@openssh.com
 
 ## Message authentication codes ##
 # Encryption provides confidentiality, message authentication code
@@ -44,7 +66,7 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
 # then extra MACs are not used, the integrity is already given.
 # If CTR is selected, then we need a MAC to calculate and attach
 # a tag to every message.
-MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com
 
 ## Hash known hosts ##
 # Ensure KnownHosts are unreadable if leaked - it is otherwise

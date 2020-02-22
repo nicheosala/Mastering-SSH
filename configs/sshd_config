@@ -89,22 +89,18 @@ PubkeyAuthentication yes
 # https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt
 KexAlgorithms curve25519-sha256@libssh.org
 
-## Server authentication ##
+## Authentication ##
 # Now that client and server shares a secret, they have to auhtenticate
 # each other: at this point, maybe the secret was shared with the wrong
 # host (i.e. NSA haha).
 # The server proves its identity to the client by signing the key
 # resulting from the key exchange.
-# Notice that the second HostKey is kept because I already generated
-# RSA keys and I don't want to regenerate them now. Kind of lazy behaviour.
-# However, it is a secure algorithm so why discard it forever?
 HostKey /etc/ssh/ssh_host_ed25519_key
-HostKey /etc/ssh/ssh_host_rsa_key
 
 ## Symmetric ciphers ##
 # Symmetric ciphers are used to encrypt the data after the initial key
 # exchange and authentication is complete.
-Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+Ciphers chacha20-poly1305@openssh.com
 
 ## Message authentication codes ##
 # Encryption provides confidentiality, message authentication code
@@ -112,7 +108,7 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
 # then extra MACs are not used, the integrity is already given.
 # If CTR is selected, then we need a MAC to calculate and attach
 # a tag to every message.
-MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com
 
 ## Log ##
 # LogLevel VERBOSE logs user's key fingerprint on login.
