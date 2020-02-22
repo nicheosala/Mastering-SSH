@@ -1,0 +1,137 @@
+# Nicolò Sala, 15 feb. 2020
+
+## Check the protocol ##
+# There exist two versions of SSH protocol: 1 and 2.
+# Version 1 has been deprecated (TODO: why?).
+# The following line enforces the usage of verson 2.
+Protocol 2
+
+## Disable root ##
+# Instead of using root, we should be using connecting
+# as user with sudo permission.
+# So let’s disable the ability of root to login using SSH.
+PermitRootLogin no
+
+## Disable Idle sessions ##
+# Idle sessions can be dangerous. It is a good idea to log
+# people out after a set amount of inactivity.
+# The ClientAliveInterval is the amount of time in seconds
+# before the server will send an alive message to
+# the client after no data has been received.
+# ClientAliveCountMax is the number of times it will check
+# before disconnecting. In the example below, the server
+# will check on the client after 5 minutes of inactivity.
+# It will do this twice then disconnect.
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+## Whitelist users ##
+# We can limit the users that are allowed to log in SSH.
+# This is a whitelist. Only users in this list will be allowed.
+# Everyone else will be denied. Simply point out the only users
+# you want to allow to use SSH.
+# AllowUSers USERNAME
+
+## Whitelist groups ##
+# I decided to disable whitelist users and use whitelist groups.
+# Why? When deleting a user from the system, the username is not
+# removed from sshd_config, which adds to maintenance requirements.
+# The solution is to use the AllowGroups setting instead,
+# and add users to an ssh-user group.
+# Moreover, I don't have to write my username in this document,
+# making it more general.
+# Create the ssh-user group with 'sudo groupadd ssh-user',
+# then add each ssh user to the group with
+# 'sudo usermod -a -G ssh-user <username>'.
+AllowGroups ssh-user
+
+## Disable password authentication ##
+# If we have SSH keys working we can just disable
+# all password authentication. Login using SSH keys
+# is way more secure than using a password, because
+# there exists attacks that can find out the password
+# using effective heuristics. When you use SSH keys,
+# the attacker can only perform a brute-force attack,
+# with no good heuristics to exploit.
+PasswordAuthentication no
+
+## Disable X11 forwarding ##
+# This guide is intended for use with remote servers.
+# Generally speaking, there is no reason to use a GUI 
+# for a remote server. So disable X11 forwarding.
+X11Forwarding no
+
+## Disable multi-factor authentication ##
+# Okay, you can think to activate this.
+# However, I think the authentication process
+# would become too difficult for nothing:
+# we already use an SSH key! However, I reccomend
+# you to use OTP with your online accounts, because
+# there's only a password to protect them by default.
+# PAM stand for 'Privileged Access Management'. Not
+# using multi-factor auth, we don't have to give
+# any privileged access.
+UsePAM no
+ChallengeResponseAuthentication no
+
+## Public key authentication ##
+# Explicitly allow authentication through SSH keys.
+PubkeyAuthentication yes
+
+## Key exchange ##
+# After the client opens a TCP connection with the server,
+# the first 'real' step of the SSH protocol is the key exchange:
+# the client and the server uses an algorithm in order to share
+# a secret key. There are basically two ways to do key exchange:
+# Diffie-Hellman and Elliptic-curve Diffie-Hellman.
+# We will use only the most secure algorithm. You can find its
+# detailed description here:
+# https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt
+KexAlgorithms curve25519-sha256@libssh.org
+
+## Server authentication ##
+# Now that client and server shares a secret, they have to auhtenticate
+# each other: at this point, maybe the secret was shared with the wrong
+# host (i.e. NSA haha).
+# The server proves its identity to the client by signing the key
+# resulting from the key exchange.
+# Notice that the second HostKey is kept because I already generated
+# RSA keys and I don't want to regenerate them now. Kind of lazy behaviour.
+# However, it is a secure algorithm so why discard it forever?
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+## Symmetric ciphers ##
+# Symmetric ciphers are used to encrypt the data after the initial key
+# exchange and authentication is complete.
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+
+## Message authentication codes ##
+# Encryption provides confidentiality, message authentication code
+# provides integrity. We need both. If an AE cipher mode is selected,
+# then extra MACs are not used, the integrity is already given.
+# If CTR is selected, then we need a MAC to calculate and attach
+# a tag to every message.
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+## Log ##
+# LogLevel VERBOSE logs user's key fingerprint on login.
+# Needed to have a clear audit track of which key was using to log in.
+LogLevel VERBOSE
+
+### WARNING ###
+# This line was in the default config file. However, I decided to
+# comment it because it seems to be dangerous:
+# https://serverfault.com/questions/427522/why-is-acceptenv-considered-insecure#427540
+# CHECK
+# Allow client to pass locale environment variables
+# AcceptEnv LANG LC_*
+
+### WARNING ###
+# I do not really understand the following command, that was 
+# present into the default config file. However, I decided to
+# comment it w.r.t. to this:
+# https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server
+# CHECK
+# Override default of no subsystems
+# Subsystem       sftp    /usr/lib/openssh/sftp-server

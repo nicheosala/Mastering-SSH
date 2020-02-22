@@ -1,0 +1,55 @@
+# Nicolò Sala, 15 feb. 2020
+
+Host *
+## Check the protocol ##
+# There exist two versions of SSH protocol: 1 and 2.
+# Version 1 has been deprecated (TODO: why?).
+# The following line enforces the usage of verson 2.
+Protocol 2
+
+## Disable X11 forwarding ##
+# This guide is intended for use with remote servers.
+# Generally speaking, there is no reason to use a GUI 
+# for a remote server. So disable X11 forwarding.
+ForwardX11 no
+
+## Public key authentication ##
+# Explicitly allow authentication through SSH keys.
+PubkeyAuthentication yes
+
+## Key exchange ##
+# After the client opens a TCP connection with the server,
+# the first 'real' step of the SSH protocol is the key exchange:
+# the client and the server uses an algorithm in order to share
+# a secret key. There are basically two ways to do key exchange:
+# Diffie-Hellman and Elliptic-curve Diffie-Hellman.
+# We will use only the most secure algorithm. You can find its
+# detailed description here:
+# https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt
+KexAlgorithms curve25519-sha256@libssh.org
+
+## Client authentication ##
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+HostKeyAlgorithms ssh-ed25519-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-ed25519,ssh-rsa
+
+## Symmetric ciphers ##
+# Symmetric ciphers are used to encrypt the data after the initial key
+# exchange and authentication is complete.
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+
+## Message authentication codes ##
+# Encryption provides confidentiality, message authentication code
+# provides integrity. We need both. If an AE cipher mode is selected,
+# then extra MACs are not used, the integrity is already given.
+# If CTR is selected, then we need a MAC to calculate and attach
+# a tag to every message.
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+## Hash known hosts ##
+# Ensure KnownHosts are unreadable if leaked - it is otherwise
+# easier to know which hosts your keys have access to.
+HashKnownHosts yes
+
+## Log ##
+LogLevel VERBOSE
