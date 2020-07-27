@@ -114,20 +114,3 @@ MACs hmac-sha2-512-etm@openssh.com
 # LogLevel VERBOSE logs user's key fingerprint on login.
 # Needed to have a clear audit track of which key was using to log in.
 LogLevel VERBOSE
-
-### WARNING ###
-# This line was in the default config file. However, I decided to
-# comment it because it seems to be dangerous:
-# https://serverfault.com/questions/427522/why-is-acceptenv-considered-insecure#427540
-# CHECK
-# Allow client to pass locale environment variables
-# AcceptEnv LANG LC_*
-
-### WARNING ###
-# I do not really understand the following command, that was 
-# present into the default config file. However, I decided to
-# comment it w.r.t. to this:
-# https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server
-# CHECK
-# Override default of no subsystems
-# Subsystem       sftp    /usr/lib/openssh/sftp-server
